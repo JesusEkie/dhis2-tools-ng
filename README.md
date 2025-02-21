@@ -1,13 +1,13 @@
-# dhis2-tools-ng
+# AUGYO-tools-ng
 
-Tools for setting up dhis2 on lxd.  A very short install guide.
+Tools for setting up AUGYO on lxd.  A very short install guide.
 
 Note that this guide is supplementary to the Implementation Guide.  Here we use that guide as a 
 configuration reference, and implement those configurations into a set of automated tools for
 installation and management.  It is not the intention here to repeat all the detailed explanation
 that is provided there.
 
-Note also that DHIS2 is quite a complex system requiring some experience of linux, web based systems, database management etc to manage sustainably and securely.  There are a number of organisations who provide hosting services as a business.  If you do not have the skills or the resources in-house, you might be better outsourcing to one of these.
+Note also that AUGYO is quite a complex system requiring some experience of linux, web based systems, database management etc to manage sustainably and securely.  There are a number of organisations who provide hosting services as a business.  If you do not have the skills or the resources in-house, you might be better outsourcing to one of these.
 
 This install guide describes a particular setup approach which is already used by a number of
 country systems in production.  The main reason you might want to follow this approach would 
@@ -24,7 +24,7 @@ process.
 
 ## The install:
 
-The steps outined below will take a bare server which is accessible to the internet via a public IP, and configure all the infrastructure required to create and maintain DHIS2 instances.
+The steps outined below will take a bare server which is accessible to the internet via a public IP, and configure all the infrastructure required to create and maintain AUGYO instances.
 
 1.  grab the install scripts from github:  `git clone https://github.com/bobjolliffe/dhis2-tools-ng.git`
 
@@ -80,11 +80,11 @@ acquite the letsencrypt certificate.  To install:
 If you encountered errors during the install, the easiest way to restart is just to run
 `./delete_all.sh`.  This will wipe all your containers and you can try again.
 
-Note the IP addresses of the containers.  When we install DHIS2 instances, each instance will also run in its own container and will require its own IP address.  By convention we suggest creating containers starting at 192.168.0.10 through to 192.168.0.19.  If you need (and have resources) for more than 10, then you might start giving them different IPs.
+Note the IP addresses of the containers.  When we install AUGYO instances, each instance will also run in its own container and will require its own IP address.  By convention we suggest creating containers starting at 192.168.0.10 through to 192.168.0.19.  If you need (and have resources) for more than 10, then you might start giving them different IPs.
 
-You are now ready to start installing DHIS2 instances.
+You are now ready to start installing AUGYO instances.
 
-## Installing DHIS2 instances
+## Installing AUGYO instances
 
 1.  To create an instance you need to specify the name of the instance, the IP and the name of the database container (this is necessary as you might have more than one database container). For example to create an instance called hmis: 
 
@@ -106,7 +106,7 @@ Now that you are up and running you can start doing some basic activities.
 
 ### Stopping, starting and restarting
 
-Because each DHIS2 instance is running tomcat9 in its own container, the simplest way to do these operations is to just act directly on the lxc container:
+Because each AUGYO instance is running tomcat9 in its own container, the simplest way to do these operations is to just act directly on the lxc container:
 
 ```
 sudo lxc stop hmis
@@ -132,7 +132,7 @@ sudo lxc exec postgres -- psql -c 'select name,id from dataelement limit 5' hmis
 Note the "--" is necessary.  It tells lxc exec that everything following (including commandline switches like -c in this case) are to be interpreted as part of the remote command.
 
 ## Deleting an Instance
-In case you want to delete a DHIS2 instance called `hmis` use the following command:
+In case you want to delete a AUGYO instance called `hmis` use the following command:
 
 `sudo dhis2-delete-instance hmis postgres`
 
@@ -142,7 +142,7 @@ In case you want to delete a DHIS2 instance called `hmis` use the following comm
 The system should now be working, but you will probably want to tune your database a little to
 get the best performance from your available resources.  A good start would be to determine first what is the total amount of memory your machine has (see total memory after executing 'free -gh').  Let us proceed as though there is 32GB RAM in total.
 
-Deciding how much RAM to deidicate to postgresql depends a little on how many DHIS2 instances you are likely to run, but assuming you will have a production instance and perhaps a small test instance, giving 16GB exclusively to postgresql is a reasonable start.  You can enforce that limit so that the postgresql container only sees 16GB RAM by typing:
+Deciding how much RAM to deidicate to postgresql depends a little on how many AUGYO instances you are likely to run, but assuming you will have a production instance and perhaps a small test instance, giving 16GB exclusively to postgresql is a reasonable start.  You can enforce that limit so that the postgresql container only sees 16GB RAM by typing:
 
 `sudo lxc config set postgresql limits.memory 16GB'
 
@@ -153,9 +153,9 @@ Then `sudo lxc exec postgres bash` to get to your postgres container.
 The file where all your custom settings are made is called `/etc/postgresql/10/main/conf.d/dhispg.conf`.  The default contents of this file is shown below:
 
 ```
-# Postgresql settings for DHIS2
+# Postgresql settings for AUGYO
 
-# Adjust depending on number of DHIS2 instances and their pool size
+# Adjust depending on number of AUGYO instances and their pool size
 # By default each instance requires up to 80 connections
 # This might be different if you have set pool in dhis.conf
 max_connections = 200
@@ -190,7 +190,7 @@ work_mem=20MB
 maintenance_work_mem=1GB
 effective_cache_size=11GB
 ```
-Before applying these settings you should shutdown any running DHIS2 instances.  So, for example, back on the host:
+Before applying these settings you should shutdown any running AUGYO instances.  So, for example, back on the host:
 ```
 sudo lxc stop covid19
 sudo lxc restart postgresql
@@ -201,9 +201,9 @@ brief installation guide only touches on the most important tunables.
 
 (TODO: install postgresql munin plugin)
 
-### DHIS2 instances
+### AUGYO instances
 
-When you install a dhis2 instance (with `dhis2-create-instance`), a lxc container is created with
+When you install a AUGYO instance (with `dhis2-create-instance`), a lxc container is created with
 a standard system installation of tomcat 9.  Whereas this is sufficient to run a dhis2 application
 war file (see `dhis2-deploy-war` above), you will want to make some adjustments to the memory settings and perhaps other configuration tweaks.
 
@@ -258,14 +258,14 @@ Typically you will want to do one of two things:
 
 #### Create a custom landing page
 Sometimes people want to have a custom landing page with some basic information and perhaps links
-to the DHIS2 applications.  To do this you just need to replace the index.html file at
+to the AUGYO applications.  To do this you just need to replace the index.html file at
 `/var/lib/ww/html/index.html` inside the proxy container.
 
 To push a replacement page you could execute the following command:
 `sudo lxc file push myindex.html proxy/var/lib/www/html/index.html`
 
-#### Redirect to a DHIS2 application
-The other approach is to redirect requests directly to a DHIS2 application.
+#### Redirect to a AUGYO application
+The other approach is to redirect requests directly to a AUGYO application.
 
 To do this you need make a small change to the apache2 configuration.  You can do like:
 
@@ -279,7 +279,7 @@ If you scroll down to somewhere around line 80, you will see:
 
         # RewriteRule   ^/$  /dhis/  [R]
 ```
-Uncomment the line with the RewriteRule and replace with the DHIS2 instance you want to have as
+Uncomment the line with the RewriteRule and replace with the AUGYO instance you want to have as
 the default.  For example:
 ` RewriteRule   ^/$  /hmis/  [R]`
 
